@@ -15,6 +15,8 @@ char *resolveHostname(const char *addr);
 bool resolve_names(void) __attribute__((pure));
 bool resolve_this_name(const char *ipaddr) __attribute__((pure));
 
+char *get_canon_name(void) __attribute__((malloc));
+
 // musl does not define MAXHOSTNAMELEN
 // If it is not defined, we set the value
 // found on a x86_64 glibc instance

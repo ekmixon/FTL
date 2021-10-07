@@ -614,6 +614,32 @@ static void resolveUpstreams(const bool onlynew)
 	}
 }
 
+char * __attribute__((malloc)) get_canon_name(void)
+{
+	int ret;
+	struct addrinfo *res;
+	struct addrinfo hints;
+	memset(&hints, 0, sizeof(struct addrinfo));
+	// Use datagram socket
+	hints.ai_socktype = SOCK_DGRAM;
+	// If hints.ai_flags includes the AI_CANONNAME flag, then the
+	// ai_canonname field of the first of the addrinfo structures in the
+	// returned list is set to point to the official name of the host.
+	hints.ai_flags = AI_CANONNAME;
+
+	// Get hostname of the system
+	const char *localhost = hostname();
+
+	// Get network address information
+	if ((ret = getaddrinfo(localhost, NULL, &hints, &res)) != 0)
+	{
+		logg("Error when obtaning hostname suffix: %s", gai_strerror(ret));
+		return strdup("fqdn");
+	}
+
+	return strdup(res->ai_canonname);
+}
+
 void *DNSclient_thread(void *val)
 {
 	// Set thread name

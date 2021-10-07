@@ -2692,21 +2692,25 @@ void FTL_fork_and_bind_sockets(struct passwd *ent_pw)
 
 		case PTR_HOSTNAMEFQDN:
 		{
-			char *suffix = daemon->domain_suffix;
-			if(!suffix)
-				suffix = (char*)"fqdn";
-			ptrname = calloc(strlen(hostname()) + strlen(suffix) + 2, sizeof(char));
-			if(ptrname)
+			if(daemon->domain_suffix)
 			{
-				// Build "<hostname>.<local suffix>" domain
-				strcpy(ptrname, hostname());
-				strcat(ptrname, ".");
-				strcat(ptrname, suffix);
+				ptrname = calloc(strlen(hostname()) + strlen(daemon->domain_suffix) + 2, sizeof(char));
+				if(ptrname)
+				{
+					// Build "<hostname>.<local domain>"
+					strcpy(ptrname, hostname());
+					strcat(ptrname, ".");
+					strcat(ptrname, daemon->domain_suffix);
+				}
+				else
+				{
+					// Fallback to "<hostname>" on memory error
+					ptrname = (char*)hostname();
+				}
 			}
 			else
 			{
-				// Fallback to "<hostname>" on memory error
-				ptrname = (char*)hostname();
+				ptrname = get_canon_name();
 			}
 		}
 			break;
