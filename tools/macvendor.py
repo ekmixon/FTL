@@ -25,46 +25,43 @@ urllib.request.install_opener(opener)
 urllib.request.urlretrieve("https://code.wireshark.org/review/gitweb?p=wireshark.git;a=blob_plain;f=manuf", "manuf.data")
 print("...done")
 
-# Read file into memory and process lines
-manuf = open("manuf.data", "r")
-data = []
-print("Processing...")
-for line in manuf:
-	line = line.strip()
+with open("manuf.data", "r") as manuf:
+	data = []
+	print("Processing...")
+	for line in manuf:
+		line = line.strip()
 
-	# Skip comments and empty lines
-	if line == "" or line[0] == "#":
-		continue
+		# Skip comments and empty lines
+		if line == "" or line[0] == "#":
+			continue
 
-	# Remove quotation marks as these might interfere with later INSERT / UPDATE commands
-	line = re.sub("\'|\"","", line)
-	# \s = Unicode whitespace characters, including [ \t\n\r\f\v]
-	cols = re.split("\s\s+|\t", line)
-	# Use try/except chain to catch empty/incomplete lines without failing hard
-	try:
-		# Strip whitespace and quotation marks (some entries are incomplete and cause errors with the CSV parser otherwise)
-		mac = cols[0].strip().strip("\"")
-	except:
-		continue
-	try:
-		desc_short = cols[1].strip().strip("\"")
-	except:
-		desc_short = ""
-	try:
-		desc_long = cols[2].strip().strip("\"")
-	except:
-		desc_long = ""
+		# Remove quotation marks as these might interfere with later INSERT / UPDATE commands
+		line = re.sub("\'|\"","", line)
+		# \s = Unicode whitespace characters, including [ \t\n\r\f\v]
+		cols = re.split("\s\s+|\t", line)
+		# Use try/except chain to catch empty/incomplete lines without failing hard
+		try:
+			# Strip whitespace and quotation marks (some entries are incomplete and cause errors with the CSV parser otherwise)
+			mac = cols[0].strip().strip("\"")
+		except:
+			continue
+		try:
+			desc_short = cols[1].strip().strip("\"")
+		except:
+			desc_short = ""
+		try:
+			desc_long = cols[2].strip().strip("\"")
+		except:
+			desc_long = ""
 
-	# Only add long description where available
-	# There are a few vendors for which only the
-	# short description field is used
-	if(desc_long):
-		data.append([mac, desc_long])
-	else:
-		data.append([mac, desc_short])
-print("...done")
-manuf.close()
-
+		# Only add long description where available
+		# There are a few vendors for which only the
+		# short description field is used
+		if(desc_long):
+			data.append([mac, desc_long])
+		else:
+			data.append([mac, desc_short])
+	print("...done")
 # Create database
 database = "macvendor.db"
 
